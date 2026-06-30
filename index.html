@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>xFund - 金融数据供应链智能平台</title>
+<style>
+/* ============ CSS Reset & Base ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-primary:#0a0e1a;
+  --bg-secondary:#111827;
+  --bg-card:#1a2235;
+  --bg-card-hover:#1e2a42;
+  --accent:#00d4aa;
+  --accent-dim:rgba(0,212,170,.12);
+  --accent2:#3b82f6;
+  --accent3:#f59e0b;
+  --text-primary:#e8edf5;
+  --text-secondary:#8b97b0;
+  --text-muted:#5a6478;
+  --border:#1e293b;
+  --border-light:#2d3a50;
+  --red:#ef4444;
+  --green:#22c55e;
+  --gradient-hero:linear-gradient(135deg,#0a0e1a 0%,#0d1b2a 50%,#1b2838 100%);
+  --gradient-accent:linear-gradient(135deg,#00d4aa,#3b82f6);
+  --shadow-lg:0 20px 60px rgba(0,0,0,.4);
+  --shadow-card:0 4px 20px rgba(0,0,0,.25);
+  --radius:12px;
+  --radius-sm:8px;
+  --radius-xs:6px;
+  --font-mono:'SF Mono','Fira Code','Consolas',monospace;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none;transition:color .2s}
+a:hover{color:#00ffcc}
+img{max-width:100%;display:block}
+button{cursor:pointer;border:none;font:inherit}
+
+/* ============ Utility ============ */
+.container{max-width:1280px;margin:0 auto;padding:0 24px}
+.section{padding:100px 0}
+.section-title{font-size:2rem;font-weight:700;margin-bottom:.5rem}
+.section-sub{color:var(--text-secondary);font-size:1.05rem;margin-bottom:48px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-blue{background:rgba(59,130,246,.15);color:#3b82f6}
+.badge-amber{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444}
+.glow-text{background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ============ Navigation ============ */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,14,26,.82);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:all .3s}
+.navbar.scrolled{background:rgba(10,14,26,.95);box-shadow:0 4px 30px rgba(0,0,0,.3)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{display:flex;align-items:center;gap:10px;font-size:1.35rem;font-weight:800;letter-spacing:-.5px}
+.nav-logo .logo-icon{width:36px;height:36px;background:var(--gradient-accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;color:#0a0e1a}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{color:var(--text-secondary);font-size:.9rem;font-weight:500;transition:color .2s;position:relative}
+.nav-links a:hover,.nav-links a.active{color:var(--text-primary)}
+.nav-links a.active::after{content:'';position:absolute;bottom:-20px;left:0;right:0;height:2px;background:var(--accent);border-radius:2px}
+.nav-actions{display:flex;gap:12px;align-items:center}
+.btn{padding:8px 20px;border-radius:var(--radius-xs);font-size:.875rem;font-weight:600;transition:all .2s}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border-light)}
+.btn-ghost:hover{color:var(--text-primary);border-color:var(--text-muted)}
+.btn-primary{background:var(--gradient-accent);color:#0a0e1a}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn-outline:hover{background:var(--accent-dim)}
+.btn-lg{padding:12px 32px;font-size:1rem;border-radius:var(--radius-sm)}
+
+/* ============ Hero ============ */
+.hero{min-height:100vh;display:flex;align-items:center;background:var(--gradient-hero);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(0,212,170,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(59,130,246,.05) 0%,transparent 60%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:.15}
+.hero-content{position:relative;z-index:2;max-width:720px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;background:var(--accent-dim);color:var(--accent);font-size:.8rem;font-weight:600;margin-bottom:24px;border:1px solid rgba(0,212,170,.2)}
+.hero-badge .pulse{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.hero h1{font-size:3.5rem;font-weight:800;line-height:1.15;letter-spacing:-.02em;margin-bottom:20px}
+.hero p{font-size:1.15rem;color:var(--text-secondary);line-height:1.7;margin-bottom:36px;max-width:560px}
+.hero-actions{display:flex;gap:16px;margin-bottom:56px}
+.hero-stats{display:flex;gap:48px}
+.hero-stat .num{font-size:2rem;font-weight:800;color:var(--accent)}
+.hero-stat .label{font-size:.82rem;color:var(--text-muted);margin-top:2px}
+/* Floating particles */
+.hero-visual{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:600px;height:600px;z-index:1}
+
+/* ============ Stats Bar ============ */
+.stats-bar{background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:32px 0}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;text-align:center}
+.stat-item .stat-val{font-size:1.8rem;font-weight:800;color:var(--text-primary)}
+.stat-item .stat-label{font-size:.82rem;color:var(--text-muted);margin-top:4px}
+
+/* ============ Features ============ */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.feature-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;transition:all .3s;position:relative;overflow:hidden}
+.feature-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:var(--shadow-card)}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gradient-accent);opacity:0;transition:opacity .3s}
+.feature-card:hover::before{opacity:1}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:20px}
+.feature-icon.green{background:rgba(0,212,170,.12);color:var(--accent)}
+.feature-icon.blue{background:rgba(59,130,246,.12);color:var(--accent2)}
+.feature-icon.amber{background:rgba(245,158,11,.12);color:var(--accent3)}
+.feature-card h3{font-size:1.1rem;font-weight:700;margin-bottom:10px}
+.feature-card p{font-size:.9rem;color:var(--text-secondary);line-height:1.65}
+.feature-tag{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+.feature-tag span{padding:3px 10px;border-radius:4px;font-size:.72rem;background:rgba(255,255,255,.05);color:var(--text-muted)}
+
+/* ============ Supply Chain Graph ============ */
+.graph-section{background:var(--bg-secondary);overflow:hidden}
+.graph-wrapper{position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:640px}
+.graph-toolbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:rgba(26,34,53,.6)}
+.graph-toolbar .search-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid var(--border-light);border-radius:var(--radius-xs);padding:8px 16px;width:320px}
+.graph-toolbar .search-box input{background:none;border:none;color:var(--text-primary);font-size:.875rem;outline:none;width:100%}
+.graph-toolbar .search-box input::placeholder{color:var(--text-muted)}
+.graph-toolbar .toolbar-actions{display:flex;gap:8px}
+.toolbar-btn{padding:6px 14px;border-radius:var(--radius-xs);font-size:.8rem;background:rgba(255,255,255,.06);color:var(--text-secondary);border:1px solid var(--border-light);transition:all .2s}
+.toolbar-btn:hover,.toolbar-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,212,170,.3)}
+.graph-canvas{width:100%;height:calc(100% - 56px)}
+#graphCanvas{width:100%;height:100%;display:block}
+
+/* Side panel */
+.graph-side-panel{position:absolute;right:0;top:56px;bottom:0;width:360px;background:rgba(17,24,39,.95);backdrop-filter:blur(10px);border-left:1px solid var(--border);padding:24px;overflow-y:auto;transform:translateX(100%);transition:transform .3s;z-index:10}
+.graph-side-panel.open{transform:translateX(0)}
+.panel-close{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,.06);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.panel-company-name{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.panel-company-code{color:var(--text-muted);font-size:.85rem;margin-bottom:16px}
+.panel-section{margin-bottom:20px}
+.panel-section-title{font-size:.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.panel-list{list-style:none}
+.panel-list li{padding:8px 12px;border-radius:var(--radius-xs);font-size:.85rem;display:flex;justify-content:space-between;align-items:center;transition:background .2s}
+.panel-list li:hover{background:rgba(255,255,255,.04)}
+.panel-list li .name{color:var(--text-primary);flex:1;margin-right:8px}
+.panel-list li .amount{color:var(--text-muted);font-size:.78rem;font-family:var(--font-mono)}
+.panel-list li .source-link{color:var(--accent);font-size:.72rem;margin-left:8px;flex-shrink:0}
+
+/* ============ Data Modules ============ */
+.modules-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.module-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .3s}
+.module-card:hover{border-color:var(--border-light);transform:translateY(-2px)}
+.module-header{padding:24px;display:flex;align-items:flex-start;gap:16px}
+.module-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.module-info h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.module-info p{font-size:.85rem;color:var(--text-secondary);line-height:1.5}
+.module-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.module-meta{display:flex;gap:16px}
+.module-meta span{font-size:.78rem;color:var(--text-muted)}
+.module-status{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600}
+.module-status.live{color:var(--green)}
+.module-status.coming{color:var(--accent3)}
+.module-status .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ============ Data Sources / Trust ============ */
+.trust-section{background:var(--bg-secondary)}
+.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.trust-card{text-align:center;padding:32px 20px;border-radius:var(--radius);background:var(--bg-card);border:1px solid var(--border);transition:all .3s}
+.trust-card:hover{border-color:var(--border-light)}
+.trust-card .trust-icon{font-size:2rem;margin-bottom:12px}
+.trust-card h4{font-size:1rem;font-weight:700;margin-bottom:6px}
+.trust-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.5}
+
+/* ============ API Preview ============ */
+.api-section{overflow:hidden}
+.api-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.api-content h3{font-size:1.5rem;font-weight:700;margin-bottom:12px}
+.api-content p{color:var(--text-secondary);margin-bottom:24px;line-height:1.7}
+.api-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+.api-features li{display:flex;align-items:center;gap:10px;font-size:.92rem;color:var(--text-secondary)}
+.api-features li .check{color:var(--accent);font-size:1rem}
+.code-block{background:#0d1117;border:1px solid var(--border);border-radius:var(--radius);padding:24px;font-family:var(--font-mono);font-size:.82rem;line-height:1.8;color:#c9d1d9;overflow-x:auto;position:relative}
+.code-block .line-comment{color:#8b949e}
+.code-block .line-keyword{color:#ff7b72}
+.code-block .line-string{color:#a5d6ff}
+.code-block .line-func{color:#d2a8ff}
+.code-block .line-var{color:#ffa657}
+.code-header{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.code-header .dot{width:10px;height:10px;border-radius:50%}
+.code-header .dot.r{background:#ff5f57}
+.code-header .dot.y{background:#febc2e}
+.code-header .dot.g{background:#28c840}
+.code-header .filename{margin-left:auto;font-size:.72rem;color:var(--text-muted)}
+
+/* ============ Pricing ============ */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch}
+.pricing-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:36px;text-align:center;transition:all .3s;position:relative}
+.pricing-card.featured{border-color:var(--accent);box-shadow:0 0 40px rgba(0,212,170,.1)}
+.pricing-card.featured::before{content:'推荐';position:absolute;top:-12px;left:50%;transform:translateX(-50%);padding:4px 16px;border-radius:20px;background:var(--gradient-accent);color:#0a0e1a;font-size:.72rem;font-weight:700}
+.pricing-card h3{font-size:1.2rem;font-weight:700;margin-bottom:8px}
+.pricing-card .price{font-size:2.5rem;font-weight:800;margin:16px 0 8px}
+.pricing-card .price-unit{font-size:.85rem;color:var(--text-muted)}
+.pricing-card .price-desc{font-size:.82rem;color:var(--text-secondary);margin-bottom:24px}
+.pricing-features{list-style:none;text-align:left;margin-bottom:28px}
+.pricing-features li{padding:8px 0;font-size:.88rem;color:var(--text-secondary);display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.04)}
+.pricing-features li .check{color:var(--accent)}
+.pricing-features li .cross{color:var(--text-muted)}
+
+/* ============ CTA ============ */
+.cta-section{background:linear-gradient(135deg,rgba(0,212,170,.08),rgba(59,130,246,.08));border-top:1px solid var(--border);border-bottom:1px solid var(--border);text-align:center}
+.cta-section h2{font-size:2rem;font-weight:700;margin-bottom:12px}
+.cta-section p{color:var(--text-secondary);margin-bottom:32px;font-size:1.05rem}
+
+/* ============ Footer ============ */
+.footer{background:var(--bg-secondary);border-top:1px solid var(--border);padding:60px 0 32px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-brand .footer-logo{font-size:1.2rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.footer-brand p{font-size:.85rem;color:var(--text-muted);line-height:1.6}
+.footer-col h4{font-size:.85rem;font-weight:700;margin-bottom:16px;color:var(--text-primary)}
+.footer-col a{display:block;padding:4px 0;font-size:.85rem;color:var(--text-muted);transition:color .2s}
+.footer-col a:hover{color:var(--text-primary)}
+.footer-bottom{padding-top:24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--text-muted)}
+
+/* ============ Login Modal ============ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:2000;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:420px;padding:40px;position:relative;box-shadow:var(--shadow-lg)}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;font-size:1rem}
+.modal h2{font-size:1.4rem;font-weight:700;margin-bottom:8px}
+.modal .modal-sub{font-size:.88rem;color:var(--text-secondary);margin-bottom:28px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:.82rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px}
+.form-group input{width:100%;padding:10px 14px;border-radius:var(--radius-xs);border:1px solid var(--border-light);background:rgba(255,255,255,.04);color:var(--text-primary);font-size:.9rem;outline:none;transition:border-color .2s}
+.form-group input:focus{border-color:var(--accent)}
+.form-group input::placeholder{color:var(--text-muted)}
+.form-actions{margin-top:24px}
+.form-actions .btn{width:100%;padding:12px;font-size:.95rem}
+.form-switch{text-align:center;margin-top:16px;font-size:.85rem;color:var(--text-muted)}
+.form-switch a{color:var(--accent);font-weight:600}
+
+/* ============ Responsive ============ */
+@media(max-width:1024px){
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .trust-grid{grid-template-columns:repeat(2,1fr)}
+  .pricing-grid{grid-template-columns:1fr}
+  .api-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:2.5rem}
+  .hero-stats{gap:32px}
+  .modules-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .features-grid{grid-template-columns:1fr}
+  .trust-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(3,1fr)}
+  .hero h1{font-size:2rem}
+  .hero-stats{flex-wrap:wrap;gap:24px}
+  .graph-wrapper{height:500px}
+  .graph-side-panel{width:100%}
+}
+
+/* ============ Scrollbar ============ */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg-primary)}
+::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+
+/* ============ Animations ============ */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes countUp{from{opacity:0}to{opacity:1}}
+.animate{opacity:0;animation:fadeInUp .6s ease forwards}
+.delay-1{animation-delay:.1s}
+.delay-2{animation-delay:.2s}
+.delay-3{animation-delay:.3s}
+.delay-4{animation-delay:.4s}
+</style>
+</head>
+<body>
+
+<!-- ==================== NAV ==================== -->
+<nav class="navbar" id="navbar">
+  <div class="container nav-inner">
+    <div class="nav-logo">
+      <div class="logo-icon">xF</div>
+      <span>x<span class="glow-text">Fund</span></span>
+    </div>
+    <div class="nav-links">
+      <a href="#home" class="active">首页</a>
+      <a href="#graph">供应链图谱</a>
+      <a href="#modules">数据模块</a>
+      <a href="#api">API接口</a>
+      <a href="#pricing">定价</a>
+      <a href="https://github.com" target="_blank">文档</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-ghost" onclick="showModal('login')">登录</button>
+      <button class="btn btn-primary" onclick="showModal('register')">免费注册</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero" id="home">
+  <div class="hero-grid"></div>
+  <div class="container hero-content">
+    <div class="hero-badge">
+      <span class="pulse"></span>
+      Source-Verified Financial Data
+    </div>
+    <h1>A股上市公司<br><span class="glow-text">供应链数据</span>智能平台</h1>
+    <p>覆盖 5,494 家 A 股上市公司的供应商与客户关系图谱，数据源来自公司公告、权威新闻等公开信息，每条数据均可溯源验证。</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary btn-lg" onclick="showModal('register')">立即体验 →</button>
+      <button class="btn btn-outline btn-lg" onclick="scrollTo('#graph')">查看图谱 Demo</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num" data-count="5494">0</div><div class="label">上市公司</div></div>
+      <div class="hero-stat"><div class="num" data-count="38739">0</div><div class="label">供应商关系</div></div>
+      <div class="hero-stat"><div class="num" data-count="25741">0</div><div class="label">客户关系</div></div>
+      <div class="hero-stat"><div class="num" data-count="112">0</div><div class="label">行业覆盖</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== STATS BAR ==================== -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-val glow-text">3,114+</div><div class="stat-label">已收录公司数据</div></div>
+      <div class="stat-item"><div class="stat-val">64,480+</div><div class="stat-label">供应链关系条目</div></div>
+      <div class="stat-item"><div class="stat-val">33</div><div class="stat-label">省市区域</div></div>
+      <div class="stat-item"><div class="stat-val">100%</div><div class="stat-label">数据源可溯</div></div>
+      <div class="stat-item"><div class="stat-val">T+1</div><div class="stat-label">数据更新频率</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FEATURES ==================== -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-title">为什么选择 <span class="glow-text">xFund</span></div>
+    <div class="section-sub">区别于 Wind、野尘等传统数据商，xFund 专注于可验证的供应链关系数据</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon green">🔗</div>
+        <h3>数据源可验证</h3>
+        <p>每条供应链关系数据都附带原始来源链接，支持回溯至公告原文或新闻报道，确保数据真实可靠。</p>
+        <div class="feature-tag"><span>公告原文</span><span>新闻链接</span><span>可溯源</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue">🕸️</div>
+        <h3>知识图谱可视化</h3>
+        <p>交互式供应链关系图谱，支持多层级展开、公司搜索与筛选，直观展示企业上下游关系网络。</p>
+        <div class="feature-tag"><span>力导向图</span><span>交互探索</span><span>多维筛选</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon amber">📊</div>
+        <h3>多维数据融合</h3>
+        <p>供应链数据与日频行情、研报数据等多维度融合，为量化投资和基本面分析提供全景视角。</p>
+        <div class="feature-tag"><span>供应链</span><span>日频行情</span><span>研报</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green">⚡</div>
+        <h3>标准化 API 接口</h3>
+        <p>提供 Python SDK 和 RESTful API，一行代码即可获取指定公司的供应商/客户数据，方便接入量化策略。</p>
+        <div class="feature-tag"><span>Python SDK</span><span>REST API</span><span>JSON</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue">🏭</div>
+        <h3>全行业覆盖</h3>
+        <p>覆盖电气设备、半导体、化工、医药等 112 个细分行业，横跨 33 个省市区域，A 股全市场无死角。</p>
+        <div class="feature-tag"><span>112 行业</span><span>33 区域</span><span>全A股</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon amber">🔒</div>
+        <h3>合规与安全</h3>
+        <p>所有数据均来源于公开信息，符合证券信息使用规范。平台采用企业级安全架构，保障用户数据隐私。</p>
+        <div class="feature-tag"><span>公开数据</span><span>合规使用</span><span>安全传输</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SUPPLY CHAIN GRAPH ==================== -->
+<section class="section graph-section" id="graph">
+  <div class="container">
+    <div class="section-title">供应链 <span class="glow-text">知识图谱</span></div>
+    <div class="section-sub">交互式探索 A 股上市公司的供应商与客户关系网络 · 点击节点查看详情</div>
+    <div class="graph-wrapper">
+      <div class="graph-toolbar">
+        <div class="search-box">
+          <span style="color:var(--text-muted)">🔍</span>
+          <input type="text" id="graphSearch" placeholder="搜索公司名称，如：比亚迪、宁德时代..." oninput="searchGraph(this.value)">
+        </div>
+        <div class="toolbar-actions">
+          <button class="toolbar-btn active" onclick="setGraphLayout('force')">力导向</button>
+          <button class="toolbar-btn" onclick="setGraphLayout('radial')">辐射</button>
+          <button class="toolbar-btn" onclick="resetGraph()">重置</button>
+        </div>
+      </div>
+      <div class="graph-canvas">
+        <canvas id="graphCanvas"></canvas>
+      </div>
+      <!-- Side panel for company details -->
+      <div class="graph-side-panel" id="sidePanel">
+        <button class="panel-close" onclick="closePanel()">✕</button>
+        <div id="panelContent"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== DATA MODULES ==================== -->
+<section class="section" id="modules">
+  <div class="container">
+    <div class="section-title">数据 <span class="glow-text">模块</span></div>
+    <div class="section-sub">多维度金融数据产品矩阵，通过统一 API 获取</div>
+    <div class="modules-grid">
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(0,212,170,.1);color:var(--accent)">🔗</div>
+          <div class="module-info">
+            <h3>供应链数据</h3>
+            <p>A 股上市公司供应商与客户关系，含交易金额、数据来源、溯源链接等字段，支持按公司/行业/区域查询。</p>
+          </div>
+        </div>
+        <div class="module-footer">
+          <div class="module-meta">
+            <span>5,494 公司</span>
+            <span>64,480+ 关系</span>
+            <span>日更</span>
+          </div>
+          <div class="module-status live"><span class="dot"></span> 已上线</div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(59,130,246,.1);color:var(--accent2)">📈</div>
+          <div class="module-info">
+            <h3>日频行情数据</h3>
+            <p>A 股全市场日频 OHLCV 数据、复权因子、涨跌停标识、换手率、市值等量化必备数据。</p>
+          </div>
+        </div>
+        <div class="module-footer">
+          <div class="module-meta">
+            <span>全A股覆盖</span>
+            <span>2000年至今</span>
+          </div>
+          <div class="module-status coming"><span class="dot"></span> 即将上线</div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(245,158,11,.1);color:var(--accent3)">📑</div>
+          <div class="module-info">
+            <h3>研报数据</h3>
+            <p>券商研究报告结构化数据，含评级、目标价、盈利预测、行业观点等，支持全文搜索与筛选。</p>
+          </div>
+        </div>
+        <div class="module-footer">
+          <div class="module-meta">
+            <span>50+ 券商</span>
+            <span>结构化解析</span>
+          </div>
+          <div class="module-status coming"><span class="dot"></span> 即将上线</div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6">🧠</div>
+          <div class="module-info">
+            <h3>另类数据</h3>
+            <p>卫星图像、社交媒体情绪、供应链物流追踪等非传统数据源，助力 Alpha 发现。</p>
+          </div>
+        </div>
+        <div class="module-footer">
+          <div class="module-meta">
+            <span>多数据源</span>
+            <span>AI增强</span>
+          </div>
+          <div class="module-status coming"><span class="dot"></span> 规划中</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== DATA SOURCES / TRUST ==================== -->
+<section class="section trust-section" id="trust">
+  <div class="container">
+    <div class="section-title">数据 <span class="glow-text">可信度</span></div>
+    <div class="section-sub">每条数据均可追溯至原始公开信息，支持一键验证</div>
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="trust-icon">📋</div>
+        <h4>公司公告</h4>
+        <p>年报、半年报中披露的前五大供应商/客户数据，来源巨潮资讯网</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">📰</div>
+        <h4>权威新闻</h4>
+        <p>财联社、证券时报等权威财经媒体的企业合作、签约、交易新闻</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🔍</div>
+        <h4>一键溯源</h4>
+        <p>每条记录附带source_url，点击即可跳转至数据原始出处页面</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🤖</div>
+        <h4>AI 校验</h4>
+        <p>NLP 模型自动提取与交叉验证，人工抽检确保准确率 > 95%</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== API PREVIEW ==================== -->
+<section class="section api-section" id="api">
+  <div class="container">
+    <div class="api-grid">
+      <div class="api-content">
+        <div class="badge badge-green" style="margin-bottom:16px">DEVELOPER FRIENDLY</div>
+        <h3>一行代码，获取<br>供应链数据</h3>
+        <p>提供 Python SDK 和 RESTful API，与 Tushare、BigQuant 等平台类似的接口设计，方便量化研究者快速接入。</p>
+        <ul class="api-features">
+          <li><span class="check">✓</span> Python SDK — <code style="color:var(--accent)">pip install xfund</code></li>
+          <li><span class="check">✓</span> RESTful API — JSON 格式返回</li>
+          <li><span class="check">✓</span> 按公司/行业/区域多维查询</li>
+          <li><span class="check">✓</span> 供应商 & 客户双向关系查询</li>
+          <li><span class="check">✓</span> 附带原始数据源链接</li>
+        </ul>
+        <button class="btn btn-primary btn-lg" onclick="showModal('register')">申请 API Token →</button>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="dot r"></span>
+          <span class="dot y"></span>
+          <span class="dot g"></span>
+          <span class="filename">example.py</span>
+        </div>
+<pre style="margin:0"><span class="line-keyword">import</span> xfund
+
+<span class="line-comment"># 初始化 (使用你的 API Token)</span>
+xf = xfund.Client(<span class="line-string">token="your_api_token"</span>)
+
+<span class="line-comment"># 获取比亚迪的供应商数据</span>
+suppliers = xf.<span class="line-func">get_suppliers</span>(
+    <span class="line-var">ts_code</span>=<span class="line-string">"002594.SZ"</span>,  <span class="line-comment"># 比亚迪</span>
+    <span class="line-var">source</span>=<span class="line-string">"公告"</span>,           <span class="line-comment"># 数据来源筛选</span>
+)
+
+<span class="line-comment"># 获取宁德时代的客户网络</span>
+customers = xf.<span class="line-func">get_customers</span>(
+    <span class="line-var">ts_code</span>=<span class="line-string">"300750.SZ"</span>,  <span class="line-comment"># 宁德时代</span>
+)
+
+<span class="line-comment"># 获取整个行业的供应链图谱</span>
+graph = xf.<span class="line-func">get_supply_chain</span>(
+    <span class="line-var">industry</span>=<span class="line-string">"半导体"</span>,
+    <span class="line-var">depth</span>=<span class="line-var">2</span>,  <span class="line-comment"># 二层关系</span>
+)
+
+<span class="line-keyword">print</span>(suppliers.head())
+<span class="line-comment">#    name              type  amount      source_url</span>
+<span class="line-comment"># 0  深圳佛吉亚...     公告  469322万元  https://...</span>
+<span class="line-comment"># 1  盛新锂能集团...   公告  170000万元  https://...</span>
+</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PRICING ==================== -->
+<section class="section" id="pricing" style="background:var(--bg-secondary)">
+  <div class="container">
+    <div class="section-title" style="text-align:center">选择你的 <span class="glow-text">方案</span></div>
+    <div class="section-sub" style="text-align:center">从免费试用到企业定制，灵活适配你的需求</div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3>Explorer</h3>
+        <div class="price">免费</div>
+        <div class="price-desc">个人学习与研究</div>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span> 供应链图谱浏览</li>
+          <li><span class="check">✓</span> 每日 100 次 API 调用</li>
+          <li><span class="check">✓</span> 前 10 大供应商/客户</li>
+          <li><span class="cross">—</span> 完整数据导出</li>
+          <li><span class="cross">—</span> 批量查询</li>
+        </ul>
+        <button class="btn btn-outline" style="width:100%" onclick="showModal('register')">免费开始</button>
+      </div>
+      <div class="pricing-card featured">
+        <h3>Researcher</h3>
+        <div class="price">¥99<span class="price-unit"> /月</span></div>
+        <div class="price-desc">量化研究者首选</div>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span> 全部供应链数据</li>
+          <li><span class="check">✓</span> 每日 10,000 次 API 调用</li>
+          <li><span class="check">✓</span> 完整数据导出 (CSV/JSON)</li>
+          <li><span class="check">✓</span> 行业链分析工具</li>
+          <li><span class="cross">—</span> 定制化数据服务</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%" onclick="showModal('register')">立即订阅</button>
+      </div>
+      <div class="pricing-card">
+        <h3>Enterprise</h3>
+        <div class="price">定制</div>
+        <div class="price-desc">机构与团队</div>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span> 全部数据模块</li>
+          <li><span class="check">✓</span> 无限 API 调用</li>
+          <li><span class="check">✓</span> 私有化部署</li>
+          <li><span class="check">✓</span> 定制数据接口</li>
+          <li><span class="check">✓</span> 专属技术支持</li>
+        </ul>
+        <button class="btn btn-outline" style="width:100%">联系我们</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CTA ==================== -->
+<section class="section cta-section">
+  <div class="container">
+    <h2>准备好探索 A 股供应链了吗？</h2>
+    <p>免费注册，即刻体验供应链图谱与 API 接口</p>
+    <button class="btn btn-primary btn-lg" onclick="showModal('register')">免费注册 →</button>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-icon" style="width:28px;height:28px;font-size:.7rem;border-radius:8px;background:var(--gradient-accent);display:inline-flex;align-items:center;justify-content:center;color:#0a0e1a;font-weight:900">xF</div>
+          x<span class="glow-text">Fund</span>
+        </div>
+        <p>xFund 致力于构建可验证、可溯源的 A 股供应链数据平台，为量化投资与产业研究提供高质量数据服务。</p>
+      </div>
+      <div class="footer-col">
+        <h4>产品</h4>
+        <a href="#graph">供应链图谱</a>
+        <a href="#modules">数据模块</a>
+        <a href="#api">API 接口</a>
+        <a href="#pricing">定价方案</a>
+      </div>
+      <div class="footer-col">
+        <h4>资源</h4>
+        <a href="#">API 文档</a>
+        <a href="#">使用教程</a>
+        <a href="#">数据字典</a>
+        <a href="#">更新日志</a>
+      </div>
+      <div class="footer-col">
+        <h4>关于</h4>
+        <a href="#">关于我们</a>
+        <a href="#">联系方式</a>
+        <a href="#">隐私政策</a>
+        <a href="#">服务条款</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 xFund. All rights reserved.</span>
+      <span>Powered by xFund Data Engine</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== LOGIN/REGISTER MODAL ==================== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="loginForm">
+      <h2>登录 xFund</h2>
+      <div class="modal-sub">使用你的账号访问供应链数据平台</div>
+      <div class="form-group">
+        <label>邮箱地址</label>
+        <input type="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" placeholder="输入密码">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary">登录</button>
+      </div>
+      <div class="form-switch">还没有账号？<a href="#" onclick="switchForm('register');return false">立即注册</a></div>
+    </div>
+    <div id="registerForm" style="display:none">
+      <h2>注册 xFund</h2>
+      <div class="modal-sub">免费注册，即刻探索供应链数据</div>
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" placeholder="你的用户名">
+      </div>
+      <div class="form-group">
+        <label>邮箱地址</label>
+        <input type="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" placeholder="至少 8 位">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary">注册</button>
+      </div>
+      <div class="form-switch">已有账号？<a href="#" onclick="switchForm('login');return false">去登录</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DEMO DATA — embedded for self-contained demo
+// ============================================================
+const DEMO_COMPANIES = [
+  {code:"601857.SH",name:"中国石油",industry:"石油",area:"北京",
+    suppliers:["中油工程","中国石化","海洋石油","昆仑能源","宝石机械","大庆石化","兰州石化","抚顺石化","吉林化工"],
+    customers:["中国航油","中国燃气","国家管网","华油能源","新奥能源","昆仑燃气","国际航空","南方航空","东方航空"]},
+  {code:"002594.SZ",name:"比亚迪",industry:"汽车配件",area:"深圳",
+    suppliers:["佛吉亚","盛新锂能","格瑞芬新能源","融捷能源","德赛西威","弗迪电池","弗迪动力","比亚迪半导体","尚水智能"],
+    customers:["融捷能源","四川路桥","比亚迪金融","优必选科技","迪派智行"]},
+  {code:"300750.SZ",name:"宁德时代",industry:"电气设备",area:"福建",
+    suppliers:["新能达科技","麟铁科技","天宜锂业","湖南邦普","广东邦普","翔丰华","德方纳米"],
+    customers:["新能达科技","时代星云","快卜新能源","上汽集团","蔚来汽车","小鹏汽车","理想汽车"]},
+  {code:"000725.SZ",name:"京东方A",industry:"元器件",area:"北京",
+    suppliers:["三利谱","长信科技","莱宝高科","深天马","华星光电","江苏澳洋","奕东电子"],
+    customers:["华为","苹果","三星","小米","联想","惠普","戴尔","OPPO","vivo"]},
+  {code:"000651.SZ",name:"格力电器",industry:"家用电器",area:"广东",
+    suppliers:["盾安环境","三花智控","海立股份","华翔电子","凯邦电机","大松电器","新元电子"],
+    customers:["京东","苏宁","国美","天猫","五星电器","格力博","银隆新能源"]},
+  {code:"000002.SZ",name:"万科A",industry:"全国地产",area:"深圳",
+    suppliers:["华为技术","深圳地铁","中国交建","天元建设","重庆诚业","中铁建设","中建三局"],
+    customers:["交通银行","中国银行","邮储银行","招商银行","建设银行"]},
+  {code:"600519.SH",name:"贵州茅台",industry:"白酒",area:"贵州",
+    suppliers:["茅台集团","红缨子高粱","仁怀市玻璃厂"],
+    customers:["茅台集团营销","茅台控股","经销商体系"]},
+  {code:"601398.SH",name:"工商银行",industry:"银行",area:"北京",
+    suppliers:["华为","中软国际","神州数码","东华软件","恒生电子"],
+    customers:["中国移动","国家电网","中国石油","中国烟草","中国铁路"]},
+  {code:"600028.SH",name:"中国石化",industry:"石油",area:"北京",
+    suppliers:["中信海直","天正科技","国泰海通"],
+    customers:["国家管网","中国航油","中国燃气"]},
+  {code:"000063.SZ",name:"中兴通讯",industry:"通信设备",area:"深圳",
+    suppliers:["立讯精密","舜宇光学","信维通信","欣旺达","比亚迪电子","中芯国际"],
+    customers:["中国移动","中国电信","中国联通","Vodafone","Orange","Telefonica"]},
+  {code:"601318.SH",name:"中国平安",industry:"保险",area:"深圳",
+    suppliers:["平安科技","金融壹账通","陆金所","平安好医生","平安银行"],
+    customers:["个人客户","企业客户","政府机构"]},
+  {code:"600588.SH",name:"用友网络",industry:"软件服务",area:"北京",
+    suppliers:["华为云","阿里云","腾讯云","亚马逊AWS"],
+    customers:["中国烟草","国家电网","中石油","中石化","中国移动","工商银行","建设银行"]},
+  {code:"601238.SH",name:"广汽集团",industry:"汽车整车",area:"广东",
+    suppliers:["广汽部件","电装中国","爱信精机","博世中国","麦格纳","法雷奥","大陆集团"],
+    customers:["广汽丰田","广汽本田","广汽埃安","广汽传祺"]},
+  {code:"000858.SZ",name:"五粮液",industry:"白酒",area:"四川",
+    suppliers:["宜宾粮油","四川玻璃","印刷包装"],
+    customers:["经销商网络","华致酒行","国酒茅台"]},
+  {code:"600887.SH",name:"伊利股份",industry:"乳制品",area:"内蒙古",
+    suppliers:["牧场合作社","利乐包装","恒天然","ADM","嘉吉"],
+    customers:["沃尔玛","家乐福","永辉超市","华润万家","大润发"]},
+];
+
+// ============================================================
+// GRAPH VISUALIZATION — Canvas-based Force-Directed Graph
+// ============================================================
+const canvas = document.getElementById('graphCanvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+let nodes = [];
+let edges = [];
+let dragging = null;
+let hoveredNode = null;
+let selectedNode = null;
+let animFrame;
+let mouseX = 0, mouseY = 0;
+let offsetX = 0, offsetY = 0;
+let scale = 1;
+let isDraggingCanvas = false;
+let lastMX, lastMY;
+
+const COLORS = {
+  center: '#00d4aa',
+  supplier: '#3b82f6',
+  customer: '#f59e0b',
+  edge_supplier: 'rgba(59,130,246,.25)',
+  edge_customer: 'rgba(245,158,11,.25)',
+  text: '#e8edf5',
+  textDim: '#5a6478',
+  bg: '#1a2235',
+};
+
+function initGraph() {
+  resizeCanvas();
+  buildGraphData();
+  simulate();
+}
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  W = rect.width;
+  H = rect.height;
+  canvas.width = W * devicePixelRatio;
+  canvas.height = H * devicePixelRatio;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+}
+
+function buildGraphData(centerIdx = 1) {
+  nodes = [];
+  edges = [];
+  const company = DEMO_COMPANIES[centerIdx];
+  
+  // Center node
+  nodes.push({
+    id: company.code,
+    name: company.name,
+    type: 'center',
+    r: 42,
+    x: W / 2,
+    y: H / 2,
+    vx: 0, vy: 0,
+    fx: W / 2, fy: H / 2,
+    industry: company.industry,
+    area: company.area,
+    data: company
+  });
+
+  // Supplier nodes
+  company.suppliers.forEach((s, i) => {
+    const angle = (i / company.suppliers.length) * Math.PI * 2 - Math.PI / 2;
+    const dist = 160 + Math.random() * 80;
+    nodes.push({
+      id: 's_' + i,
+      name: s,
+      type: 'supplier',
+      r: 18 + Math.random() * 14,
+      x: W / 2 + Math.cos(angle) * dist,
+      y: H / 2 + Math.sin(angle) * dist,
+      vx: 0, vy: 0,
+    });
+    edges.push({ source: 's_' + i, target: company.code, type: 'supplier' });
+  });
+
+  // Customer nodes
+  company.customers.forEach((c, i) => {
+    const angle = (i / company.customers.length) * Math.PI * 2;
+    const dist = 180 + Math.random() * 80;
+    nodes.push({
+      id: 'c_' + i,
+      name: c,
+      type: 'customer',
+      r: 16 + Math.random() * 12,
+      x: W / 2 + Math.cos(angle) * dist,
+      y: H / 2 + Math.sin(angle) * dist,
+      vx: 0, vy: 0,
+    });
+    edges.push({ source: company.code, target: 'c_' + i, type: 'customer' });
+  });
+
+  // Add some cross-company connections for visual richness
+  const otherCompanies = DEMO_COMPANIES.filter((_, i) => i !== centerIdx).slice(0, 4);
+  otherCompanies.forEach((oc, oi) => {
+    const angle = (oi / otherCompanies.length) * Math.PI * 2 + Math.PI / 4;
+    const dist = 300 + Math.random() * 60;
+    nodes.push({
+      id: 'oc_' + oi,
+      name: oc.name,
+      type: 'related',
+      r: 22 + Math.random() * 8,
+      x: W / 2 + Math.cos(angle) * dist,
+      y: H / 2 + Math.sin(angle) * dist,
+      vx: 0, vy: 0,
+      data: oc,
+    });
+  });
+}
+
+function simulate() {
+  const alpha = 0.3;
+  const repulsion = 3000;
+  const attraction = 0.008;
+  const damping = 0.88;
+  const centerForce = 0.002;
+
+  function tick() {
+    // Center gravity
+    nodes.forEach(n => {
+      if (n === dragging) return;
+      n.vx += (W / 2 - n.x) * centerForce;
+      n.vy += (H / 2 - n.y) * centerForce;
+    });
+
+    // Repulsion between all nodes
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[j].x - nodes[i].x;
+        const dy = nodes[j].y - nodes[i].y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = repulsion / (dist * dist);
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        if (nodes[i] !== dragging) { nodes[i].vx -= fx; nodes[i].vy -= fy; }
+        if (nodes[j] !== dragging) { nodes[j].vx += fx; nodes[j].vy += fy; }
+      }
+    }
+
+    // Attraction along edges
+    edges.forEach(e => {
+      const s = nodes.find(n => n.id === e.source);
+      const t = nodes.find(n => n.id === e.target);
+      if (!s || !t) return;
+      const dx = t.x - s.x;
+      const dy = t.y - s.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const force = (dist - 180) * attraction;
+      const fx = (dx / dist) * force;
+      const fy = (dy / dist) * force;
+      if (s !== dragging) { s.vx += fx; s.vy += fy; }
+      if (t !== dragging) { t.vx -= fx; t.vy -= fy; }
+    });
+
+    // Fixed center
+    const cn = nodes[0];
+    if (cn && cn.fx !== undefined) {
+      cn.x = cn.fx;
+      cn.y = cn.fy;
+      cn.vx = 0;
+      cn.vy = 0;
+    }
+
+    // Update positions
+    nodes.forEach(n => {
+      if (n === dragging) return;
+      n.vx *= damping;
+      n.vy *= damping;
+      n.x += n.vx;
+      n.y += n.vy;
+      // Bounds
+      n.x = Math.max(n.r, Math.min(W - n.r, n.x));
+      n.y = Math.max(n.r, Math.min(H - n.r, n.y));
+    });
+
+    draw();
+    animFrame = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  ctx.translate(offsetX, offsetY);
+  ctx.scale(scale, scale);
+
+  // Draw edges
+  edges.forEach(e => {
+    const s = nodes.find(n => n.id === e.source);
+    const t = nodes.find(n => n.id === e.target);
+    if (!s || !t) return;
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(t.x, t.y);
+    ctx.strokeStyle = e.type === 'supplier' ? COLORS.edge_supplier : COLORS.edge_customer;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Arrow
+    const angle = Math.atan2(t.y - s.y, t.x - s.x);
+    const dist = Math.sqrt((t.x-s.x)**2 + (t.y-s.y)**2);
+    const arrowDist = dist - t.r - 5;
+    const ax = s.x + Math.cos(angle) * arrowDist;
+    const ay = s.y + Math.sin(angle) * arrowDist;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(ax - 8 * Math.cos(angle - .3), ay - 8 * Math.sin(angle - .3));
+    ctx.lineTo(ax - 8 * Math.cos(angle + .3), ay - 8 * Math.sin(angle + .3));
+    ctx.closePath();
+    ctx.fillStyle = e.type === 'supplier' ? 'rgba(59,130,246,.4)' : 'rgba(245,158,11,.4)';
+    ctx.fill();
+  });
+
+  // Draw nodes
+  nodes.forEach(n => {
+    const isHovered = n === hoveredNode;
+    const isSelected = n === selectedNode;
+    
+    // Glow
+    if (isHovered || isSelected || n.type === 'center') {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r + 6, 0, Math.PI * 2);
+      const color = n.type === 'center' ? COLORS.center :
+                    n.type === 'supplier' ? COLORS.supplier :
+                    n.type === 'customer' ? COLORS.customer : '#6b7280';
+      ctx.fillStyle = color + '20';
+      ctx.fill();
+    }
+
+    // Circle
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    let baseColor;
+    if (n.type === 'center') baseColor = COLORS.center;
+    else if (n.type === 'supplier') baseColor = COLORS.supplier;
+    else if (n.type === 'customer') baseColor = COLORS.customer;
+    else baseColor = '#4b5563';
+
+    if (isHovered || isSelected) {
+      ctx.fillStyle = baseColor;
+      ctx.shadowColor = baseColor;
+      ctx.shadowBlur = 20;
+    } else {
+      ctx.fillStyle = baseColor + (n.type === 'related' ? '80' : 'cc');
+      ctx.shadowBlur = 0;
+    }
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Border
+    ctx.strokeStyle = baseColor;
+    ctx.lineWidth = isHovered || isSelected ? 2.5 : 1;
+    ctx.stroke();
+
+    // Label
+    const fontSize = n.type === 'center' ? 14 : n.r > 22 ? 11 : 10;
+    ctx.font = `${n.type === 'center' ? '700' : '500'} ${fontSize}px -apple-system, "PingFang SC", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = n.type === 'center' ? '#0a0e1a' : COLORS.text;
+    
+    const name = n.name.length > 6 ? n.name.slice(0, 5) + '..' : n.name;
+    if (n.type === 'center') {
+      ctx.fillText(name, n.x, n.y - 6);
+      ctx.font = '500 10px -apple-system, sans-serif';
+      ctx.fillStyle = '#0a0e1a99';
+      ctx.fillText(n.data?.industry || '', n.x, n.y + 10);
+    } else {
+      ctx.fillText(name, n.x, n.y);
+    }
+  });
+
+  // Legend
+  ctx.restore();
+  drawLegend();
+}
+
+function drawLegend() {
+  const lx = 24, ly = H - 80;
+  ctx.font = '600 11px -apple-system, sans-serif';
+  
+  const items = [
+    { color: COLORS.center, label: '目标公司' },
+    { color: COLORS.supplier, label: '供应商' },
+    { color: COLORS.customer, label: '客户' },
+    { color: '#4b5563', label: '关联公司' },
+  ];
+
+  items.forEach((item, i) => {
+    const y = ly + i * 20;
+    ctx.beginPath();
+    ctx.arc(lx, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = item.color;
+    ctx.fill();
+    ctx.fillStyle = COLORS.textDim;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.label, lx + 12, y);
+  });
+}
+
+// ============================================================
+// GRAPH INTERACTION
+// ============================================================
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouseX = (e.clientX - rect.left - offsetX) / scale;
+  mouseY = (e.clientY - rect.top - offsetY) / scale;
+
+  if (isDraggingCanvas) {
+    offsetX += e.clientX - lastMX;
+    offsetY += e.clientY - lastMY;
+    lastMX = e.clientX;
+    lastMY = e.clientY;
+    return;
+  }
+
+  if (dragging) {
+    dragging.x = mouseX;
+    dragging.y = mouseY;
+    return;
+  }
+
+  hoveredNode = null;
+  canvas.style.cursor = 'default';
+  for (const n of nodes) {
+    const dx = mouseX - n.x;
+    const dy = mouseY - n.y;
+    if (dx * dx + dy * dy < n.r * n.r) {
+      hoveredNode = n;
+      canvas.style.cursor = 'pointer';
+      break;
+    }
+  }
+});
+
+canvas.addEventListener('mousedown', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouseX = (e.clientX - rect.left - offsetX) / scale;
+  mouseY = (e.clientY - rect.top - offsetY) / scale;
+
+  for (const n of nodes) {
+    const dx = mouseX - n.x;
+    const dy = mouseY - n.y;
+    if (dx * dx + dy * dy < n.r * n.r) {
+      dragging = n;
+      return;
+    }
+  }
+  isDraggingCanvas = true;
+  lastMX = e.clientX;
+  lastMY = e.clientY;
+});
+
+canvas.addEventListener('mouseup', () => {
+  if (dragging && hoveredNode) {
+    selectedNode = hoveredNode;
+    showCompanyPanel(hoveredNode);
+  }
+  dragging = null;
+  isDraggingCanvas = false;
+});
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.95 : 1.05;
+  scale = Math.max(0.3, Math.min(3, scale * delta));
+});
+
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left - offsetX) / scale;
+  const my = (e.clientY - rect.top - offsetY) / scale;
+  
+  for (const n of nodes) {
+    const dx = mx - n.x;
+    const dy = my - n.y;
+    if (dx * dx + dy * dy < n.r * n.r) {
+      selectedNode = n;
+      if (n.data) {
+        // Switch to this company as center
+        const idx = DEMO_COMPANIES.findIndex(c => c.code === n.data.code);
+        if (idx >= 0) {
+          cancelAnimationFrame(animFrame);
+          buildGraphData(idx);
+          simulate();
+        }
+      }
+      showCompanyPanel(n);
+      return;
+    }
+  }
+});
+
+function showCompanyPanel(node) {
+  const panel = document.getElementById('sidePanel');
+  const content = document.getElementById('panelContent');
+  
+  // Find related edges
+  const supplierEdges = edges.filter(e => e.target === node.id && e.type === 'supplier');
+  const customerEdges = edges.filter(e => e.source === node.id && e.type === 'customer');
+  
+  const suppliers = supplierEdges.map(e => nodes.find(n => n.id === e.source)).filter(Boolean);
+  const customers = customerEdges.map(e => nodes.find(n => n.id === e.target)).filter(Boolean);
+  
+  const company = node.data || {};
+  
+  content.innerHTML = `
+    <div class="panel-company-name">${node.name}</div>
+    <div class="panel-company-code">${company.code || node.id} · ${company.industry || ''} · ${company.area || ''}</div>
+    
+    <div style="display:flex;gap:8px;margin:16px 0">
+      <span class="badge badge-blue">供应商 ${suppliers.length + (company.suppliers?.length || 0)}</span>
+      <span class="badge badge-amber">客户 ${customers.length + (company.customers?.length || 0)}</span>
+    </div>
+    
+    ${suppliers.length > 0 ? `
+    <div class="panel-section">
+      <div class="panel-section-title">
+        <span style="color:var(--accent2)">●</span> 供应商
+      </div>
+      <ul class="panel-list">
+        ${suppliers.map(s => `
+          <li>
+            <span class="name">${s.name}</span>
+            <a class="source-link" href="https://www.cls.cn/searchPage?keyword=${encodeURIComponent(node.name)}&type=telegram" target="_blank">溯源 →</a>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+    ` : ''}
+    
+    ${customers.length > 0 ? `
+    <div class="panel-section">
+      <div class="panel-section-title">
+        <span style="color:var(--accent3)">●</span> 客户
+      </div>
+      <ul class="panel-list">
+        ${customers.map(c => `
+          <li>
+            <span class="name">${c.name}</span>
+            <a class="source-link" href="https://www.cls.cn/searchPage?keyword=${encodeURIComponent(node.name)}&type=telegram" target="_blank">溯源 →</a>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+    ` : ''}
+    
+    <div class="panel-section" style="margin-top:20px;padding:16px;background:rgba(0,212,170,.06);border-radius:8px;border:1px solid rgba(0,212,170,.15)">
+      <div style="font-size:.78rem;color:var(--accent);font-weight:600;margin-bottom:6px">📋 数据来源</div>
+      <div style="font-size:.78rem;color:var(--text-muted);line-height:1.5">
+        数据来源于公司年报公告与财经新闻，每条记录均附带可验证的原始来源链接。
+        <a href="https://www.cninfo.com.cn" target="_blank" style="color:var(--accent);display:block;margin-top:4px">查看巨潮资讯网 →</a>
+      </div>
+    </div>
+  `;
+  
+  panel.classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('sidePanel').classList.remove('open');
+  selectedNode = null;
+}
+
+function searchGraph(query) {
+  if (!query.trim()) return;
+  const idx = DEMO_COMPANIES.findIndex(c => c.name.includes(query));
+  if (idx >= 0) {
+    cancelAnimationFrame(animFrame);
+    buildGraphData(idx);
+    simulate();
+  }
+}
+
+function setGraphLayout(type) {
+  document.querySelectorAll('.toolbar-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  // Re-arrange but keep the same data
+  if (type === 'radial') {
+    // Arrange suppliers on left, customers on right
+    const centerNode = nodes[0];
+    nodes.forEach((n, i) => {
+      if (i === 0) return;
+      if (n.type === 'supplier') {
+        const si = nodes.filter(nn => nn.type === 'supplier').indexOf(n);
+        const total = nodes.filter(nn => nn.type === 'supplier').length;
+        const angle = (si / total) * Math.PI - Math.PI / 2;
+        n.x = W / 2 + Math.cos(angle) * 200 - 80;
+        n.y = H / 2 + Math.sin(angle) * 180;
+      } else if (n.type === 'customer') {
+        const ci = nodes.filter(nn => nn.type === 'customer').indexOf(n);
+        const total = nodes.filter(nn => nn.type === 'customer').length;
+        const angle = (ci / total) * Math.PI - Math.PI / 2;
+        n.x = W / 2 + Math.cos(angle) * 200 + 80;
+        n.y = H / 2 + Math.sin(angle) * 180;
+      }
+    });
+  }
+}
+
+function resetGraph() {
+  offsetX = 0;
+  offsetY = 0;
+  scale = 1;
+  cancelAnimationFrame(animFrame);
+  buildGraphData(1); // Default to 比亚迪
+  simulate();
+}
+
+// ============================================================
+// NAVIGATION & UI
+// ============================================================
+window.addEventListener('scroll', () => {
+  const navbar = document.getElementById('navbar');
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+
+  // Active link
+  const sections = ['home','graph','modules','api','pricing'];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const link = document.querySelector(`.nav-links a[href="#${id}"]`);
+    if (link) {
+      link.classList.toggle('active', rect.top <= 100 && rect.bottom > 100);
+    }
+  });
+});
+
+function scrollTo(selector) {
+  document.querySelector(selector).scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function showModal(type) {
+  document.getElementById('modalOverlay').classList.add('show');
+  switchForm(type);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function switchForm(type) {
+  document.getElementById('loginForm').style.display = type === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = type === 'register' ? 'block' : 'none';
+}
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ============================================================
+// COUNT UP ANIMATION
+// ============================================================
+function animateCountUp() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count);
+    const duration = 2000;
+    const start = performance.now();
+    
+    function update(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(target * eased);
+      el.textContent = current.toLocaleString();
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+  initGraph();
+  animateCountUp();
+});
+
+window.addEventListener('resize', () => {
+  resizeCanvas();
+});
+</script>
+</body>
+</html>
